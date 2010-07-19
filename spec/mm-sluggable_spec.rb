@@ -100,4 +100,17 @@ describe "MongoMapper::Plugins::Sluggable" do
       }.should change(@article, :slug).from(nil).to("testing-123")
     end
   end
+  
+  describe "with a non-key to_slug" do
+    before(:each) do
+      @klass.sluggable :title_reversed
+      @article = @klass.new(:title => "testing 123")
+    end
+    
+    it "should set the slug on validation" do
+      lambda{
+        @article.valid?
+      }.should change(@article, :slug).from(nil).to("321-gnitset")
+    end
+  end
 end

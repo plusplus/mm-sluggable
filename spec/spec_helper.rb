@@ -18,6 +18,10 @@ def article_class
 
     key :title,       String
     key :account_id,  Integer
+    
+    def title_reversed
+      title.reverse
+    end
   end
 
   klass.collection.remove

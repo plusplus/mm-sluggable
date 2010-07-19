@@ -33,7 +33,7 @@ module MongoMapper
           options = self.class.slug_options
           return unless self.send(options[:key]).blank?
 
-          to_slug = self[options[:to_slug]]
+          to_slug = self.send( options[:to_slug] )
           return if to_slug.blank?
 
           the_slug = raw_slug = to_slug.send(options[:method]).to_s
