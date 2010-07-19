@@ -9,23 +9,28 @@ module MongoMapper
 
       module ClassMethods
         def sluggable(to_slug = :title, options = {})
-          @@slug_options = {
+          @slug_options = {
             :to_slug      => to_slug,
             :key          => :slug,
             :index        => true,
             :method       => :parameterize,
             :scope        => nil,
-            :callback     => :before_validation_on_create,
-            :search_class => self
+            :callback     => :before_validation_on_create
           }.merge(options)
 
-          key @@slug_options[:key], String, :index => @@slug_options[:index]
+          key @slug_options[:key], String, :index => @slug_options[:index]
 
-          self.send(@@slug_options[:callback], :set_slug)
+          self.send(@slug_options[:callback], :set_slug)
         end
 
         def slug_options
-          @@slug_options
+          sluggable_class.instance_variable_get( :@slug_options )
+        end
+        
+        def sluggable_class
+          return self if @slug_options
+          return self.superclass.sluggable_class unless self.superclass == Object
+          nil
         end
       end
 
@@ -45,7 +50,7 @@ module MongoMapper
 
           # todo - remove the loop and use regex instead so we can do it in one query
           i = 0
-          while options[:search_class].first(conds)
+          while self.class.sluggable_class.first(conds)
             i += 1
             conds[options[:key]] = the_slug = "#{raw_slug}-#{i}"
           end
