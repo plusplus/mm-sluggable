@@ -28,5 +28,10 @@ def article_class
   klass
 end
 
+def article_subclass( superklass )
+  Class.new( superklass )
+end
+
+
 Spec::Runner.configure do |config|
 end

@@ -5,6 +5,7 @@ describe "MongoMapper::Plugins::Sluggable" do
   
   before(:each) do
     @klass = article_class
+    @subklass = article_subclass( @klass )
   end
   
   describe "with defaults" do
@@ -113,4 +114,30 @@ describe "MongoMapper::Plugins::Sluggable" do
       }.should change(@article, :slug).from(nil).to("321-gnitset")
     end
   end
+  
+  
+  describe "with a subclass" do
+    before(:each) do
+      @klass.sluggable :title
+      @article = @subklass.new(:title => "testing 123")
+    end
+
+    it "should add a key called :slug" do
+      @article.keys.keys.should include("slug")
+    end
+
+    it "should set the slug on validation" do
+      lambda{
+        @article.valid?
+      }.should change(@article, :slug).from(nil).to("testing-123")
+    end
+
+    it "should add a version number if the slug conflicts" do
+      @klass.create(:title => "testing 123")
+      lambda{
+        @article.valid?
+      }.should change(@article, :slug).from(nil).to("testing-123-1")
+    end
+  end
+  
 end
