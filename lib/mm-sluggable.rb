@@ -14,6 +14,7 @@ module MongoMapper
             :key           => :slug,
             :index         => true,
             :method        => :parameterize,
+            :join_string   => '-',
             :finder_method => :default_slug_finder,
             :scope         => nil,
             :callback      => :before_validation_on_create
@@ -58,9 +59,9 @@ module MongoMapper
 
           # todo - remove the loop and use regex instead so we can do it in one query
           i = 0
-          while self.send( @slug_options[:finder_method], conds )
+          while self.send( options[:finder_method], conds )
             i += 1
-            conds[options[:key]] = the_slug = "#{raw_slug}-#{i}"
+            conds[options[:key]] = the_slug = "#{raw_slug}#{options[:join_string]}#{i}"
           end
 
           self.send(:"#{options[:key]}=", the_slug)
