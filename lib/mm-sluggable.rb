@@ -50,13 +50,22 @@ module MongoMapper
 
           # todo - remove the loop and use regex instead so we can do it in one query
           i = 0
-          while self.class.sluggable_class.first(conds)
+          while find_slug_match( conds )
             i += 1
             conds[options[:key]] = the_slug = "#{raw_slug}-#{i}"
           end
 
           self.send(:"#{options[:key]}=", the_slug)
         end
+        
+        
+        # override this to find an existing slug in a different manner
+        # for class. #key# will be the test slug. scope will be the scope
+        # if provided
+        def find_slug_match( conds )
+          self.class.sluggable_class.where(conds).first
+        end
+
       end
     end
   end
