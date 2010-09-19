@@ -10,17 +10,25 @@ module MongoMapper
       module ClassMethods
         def sluggable(to_slug = :title, options = {})
           @slug_options = {
-            :to_slug      => to_slug,
-            :key          => :slug,
-            :index        => true,
-            :method       => :parameterize,
-            :scope        => nil,
-            :callback     => :before_validation_on_create
+            :to_slug       => to_slug,
+            :key           => :slug,
+            :index         => true,
+            :method        => :parameterize,
+            :finder_method => :default_slug_finder,
+            :scope         => nil,
+            :callback      => :before_validation_on_create
           }.merge(options)
 
-          key @slug_options[:key], String, :index => @slug_options[:index]
 
-          self.send(@slug_options[:callback], :set_slug)
+          # Don't use index if slug is not specified, in case this is an embedded
+          # document.
+          if @slug_options[:index]
+            key @slug_options[:key], String, :index => @slug_options[:index]
+          else
+            key @slug_options[:key], String
+          end
+
+          self.send(@slug_options[:callback], :set_slug) if @slug_options[:callback]
         end
 
         def slug_options
@@ -50,7 +58,7 @@ module MongoMapper
 
           # todo - remove the loop and use regex instead so we can do it in one query
           i = 0
-          while find_slug_match( conds )
+          while self.send( @slug_options[:finder_method], conds )
             i += 1
             conds[options[:key]] = the_slug = "#{raw_slug}-#{i}"
           end
@@ -62,7 +70,7 @@ module MongoMapper
         # override this to find an existing slug in a different manner
         # for class. #key# will be the test slug. scope will be the scope
         # if provided
-        def find_slug_match( conds )
+        def default_slug_finder( conds )
           self.class.sluggable_class.where(conds).first
         end
 
