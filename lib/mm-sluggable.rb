@@ -3,10 +3,8 @@ require 'mongo_mapper'
 module MongoMapper
   module Plugins
     module Sluggable
-      def self.included(model)
-        model.plugin self
-      end
-
+      extend ActiveSupport::Concern
+  
       module ClassMethods
         def sluggable(to_slug = :title, options = {})
           @slug_options = {
