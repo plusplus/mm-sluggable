@@ -15,7 +15,8 @@ module MongoMapper
             :join_string   => '-',
             :finder_method => :default_slug_finder,
             :scope         => nil,
-            :callback      => :before_validation_on_create
+            :callback      => :before_validation,
+            :callback_on   => :create
           }.merge(options)
 
 
@@ -27,9 +28,10 @@ module MongoMapper
             key @slug_options[:key], String
           end
 
-          self.send(@slug_options[:callback], :set_slug) if @slug_options[:callback]
+          self.send(@slug_options[:callback], :set_slug, {:on => @slug_options[:callback_on]}) if @slug_options[:callback] && @slug_options[:callback_on]
+          self.send(@slug_options[:callback], :set_slug) if @slug_options[:callback] && @slug_options[:callback_on].nil?
         end
-
+        
         def slug_options
           sluggable_class.instance_variable_get( :@slug_options )
         end
