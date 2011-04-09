@@ -15,8 +15,8 @@ module MongoMapper
             :join_string   => '-',
             :finder_method => :default_slug_finder,
             :scope         => nil,
-            :callback      => :before_validation,
-            :callback_on   => :create
+            :callback      => :before_save,
+            :callback_on   => nil
           }.merge(options)
 
 
