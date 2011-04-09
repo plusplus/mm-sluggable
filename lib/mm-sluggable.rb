@@ -10,7 +10,7 @@ module MongoMapper
           @slug_options = {
             :to_slug       => to_slug,
             :key           => :slug,
-            :index         => true,
+            :index         => false,
             :method        => :parameterize,
             :join_string   => '-',
             :finder_method => :default_slug_finder,
