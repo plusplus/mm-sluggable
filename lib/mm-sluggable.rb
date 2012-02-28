@@ -43,39 +43,37 @@ module MongoMapper
         end
       end
 
-      module InstanceMethods
-        def set_slug
-          options = self.class.slug_options
-          return unless self.send(options[:key]).blank?
+      def set_slug
+        options = self.class.slug_options
+        return unless self.send(options[:key]).blank?
 
-          to_slug = self.send( options[:to_slug] )
-          return if to_slug.blank?
+        to_slug = self.send( options[:to_slug] )
+        return if to_slug.blank?
 
-          the_slug = raw_slug = to_slug.send(options[:method]).to_s
+        the_slug = raw_slug = to_slug.send(options[:method]).to_s
 
-          conds = {}
-          conds[options[:key]]   = the_slug
-          conds[options[:scope]] = self.send(options[:scope]) if options[:scope]
+        conds = {}
+        conds[options[:key]]   = the_slug
+        conds[options[:scope]] = self.send(options[:scope]) if options[:scope]
 
-          # todo - remove the loop and use regex instead so we can do it in one query
-          i = 0
-          while self.send( options[:finder_method], conds )
-            i += 1
-            conds[options[:key]] = the_slug = "#{raw_slug}#{options[:join_string]}#{i}"
-          end
-
-          self.send(:"#{options[:key]}=", the_slug)
-        end
-        
-        
-        # override this to find an existing slug in a different manner
-        # for class. #key# will be the test slug. scope will be the scope
-        # if provided
-        def default_slug_finder( conds )
-          self.class.sluggable_class.where(conds).first
+        # todo - remove the loop and use regex instead so we can do it in one query
+        i = 0
+        while self.send( options[:finder_method], conds )
+          i += 1
+          conds[options[:key]] = the_slug = "#{raw_slug}#{options[:join_string]}#{i}"
         end
 
+        self.send(:"#{options[:key]}=", the_slug)
       end
+      
+      
+      # override this to find an existing slug in a different manner
+      # for class. #key# will be the test slug. scope will be the scope
+      # if provided
+      def default_slug_finder( conds )
+        self.class.sluggable_class.where(conds).first
+      end
+
     end
   end
 end
